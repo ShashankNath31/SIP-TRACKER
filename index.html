@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIP Tracker - Shashank</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background-color: #f4f4f4;
+      transition: background 0.3s, color 0.3s;
+    }
+    h1 {
+      text-align: center;
+    }
+    .sip-entry {
+      background: #fff;
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.7rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+    table {
+      margin-top: 2rem;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #eee;
+    }
+    .dark-mode .sip-entry {
+      background: #1e1e1e;
+    }
+    .dark-mode table, .dark-mode th, .dark-mode td {
+      border-color: #333;
+    }
+    .top-bar {
+      max-width: 600px;
+      margin: 1rem auto;
+      display: flex;
+      justify-content: space-between;
+    }
+    .top-bar button {
+      width: auto;
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Shashank's SIP Tracker</h1>
+  <div class="top-bar">
+    <button onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
+    <button onclick="exportCSV()">⬇️ Export as CSV</button>
+  </div>
+
+  <div class="sip-entry">
+    <label>Fund Name:
+      <input type="text" id="fundName" placeholder="e.g., UTI Nifty 50" />
+    </label>
+    <label>SIP Amount (₹):
+      <input type="number" id="sipAmount" />
+    </label>
+    <label>SIP Date:
+      <input type="date" id="sipDate" />
+    </label>
+    <label>NAV:
+      <input type="number" step="0.01" id="nav" />
+    </label>
+    <label>Units Bought:
+      <input type="number" step="0.0001" id="units" />
+    </label>
+    <label>Current Value (Optional):
+      <input type="number" step="0.01" id="currentValue" />
+    </label>
+    <button onclick="addSip()">Add SIP</button>
+  </div>
+
+  <table id="sipTable">
+    <thead>
+      <tr>
+        <th>Fund</th>
+        <th>SIP (₹)</th>
+        <th>Date</th>
+        <th>NAV</th>
+        <th>Units</th>
+        <th>Total Invested</th>
+        <th>Current Value</th>
+        <th>Return (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    function addSip() {
+      const fund = document.getElementById('fundName').value;
+      const sip = parseFloat(document.getElementById('sipAmount').value);
+      const date = document.getElementById('sipDate').value;
+      const nav = parseFloat(document.getElementById('nav').value);
+      const units = parseFloat(document.getElementById('units').value);
+      const currentValue = parseFloat(document.getElementById('currentValue').value || 0);
+
+      const totalInvested = sip;
+      const returnPct = currentValue ? (((currentValue - totalInvested) / totalInvested) * 100).toFixed(2) : '-';
+
+      const table = document.getElementById('sipTable').getElementsByTagName('tbody')[0];
+      const row = table.insertRow();
+      row.insertCell(0).innerText = fund;
+      row.insertCell(1).innerText = `₹${sip}`;
+      row.insertCell(2).innerText = date;
+      row.insertCell(3).innerText = nav;
+      row.insertCell(4).innerText = units;
+      row.insertCell(5).innerText = `₹${totalInvested}`;
+      row.insertCell(6).innerText = currentValue ? `₹${currentValue}` : '-';
+      row.insertCell(7).innerText = returnPct === '-' ? '-' : `${returnPct}%`;
+
+      document.getElementById('fundName').value = '';
+      document.getElementById('sipAmount').value = '';
+      document.getElementById('sipDate').value = '';
+      document.getElementById('nav').value = '';
+      document.getElementById('units').value = '';
+      document.getElementById('currentValue').value = '';
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function exportCSV() {
+      const table = document.getElementById('sipTable');
+      let csv = '';
+      for (let row of table.rows) {
+        let cols = Array.from(row.cells).map(cell => '"' + cell.innerText + '"');
+        csv += cols.join(',') + '\n';
+      }
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sip_tracker.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>
